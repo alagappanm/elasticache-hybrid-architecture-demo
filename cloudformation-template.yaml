@@ -8,9 +8,9 @@
 #
 # http://aws.amazon.com/apache2.0/
 #
-# or in the "license" file accompanying this file. This file is distributed 
-# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
-# express or implied. See the License for the specific language governing 
+# or in the "license" file accompanying this file. This file is distributed
+# on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+# express or implied. See the License for the specific language governing
 #  permissions and limitations under the License.
 #
 
@@ -50,6 +50,7 @@ Metadata:
                 - CachePort
                 - CacheEngine
                 - CacheEngineVersion
+                - Cachesubnet
             - Label:
                 default: "Web Instance Configuration"
               Parameters:
@@ -96,7 +97,7 @@ Parameters:
         AllowedPattern: "[a-zA-Z0-9 ]*"
     CustomerAddress:
         Type: String
-        Default: "10.0.0.5/32"
+        Default: "10.0.1.5/32"
         Description: "Source address allowed to connect to EC2 instance, YOU SHOULD INCLUDE /32 at the end of your IP. You can also use 0.0.0.0/0 for open access, however, is NOT RECOMMENDED"
     CacheToken:
         Type: String
@@ -105,6 +106,10 @@ Parameters:
         AllowedPattern: "[a-zA-Z0-9]*"
         MinLength: 16
         MaxLength: 128
+    Cachesubnet:
+        Type: String
+        Default: "testec1"
+        Description: "Cache subnet group name where this was erroring out"
     CacheInstanceType:
         Type: String
         Default: cache.t2.small
@@ -310,7 +315,7 @@ Mappings:
         sa-east-1:
             AMI: ami-84175ae8
             DeviceName: /dev/xvda
-    
+
 Resources:
     WebRole:
         Type: AWS::IAM::Role
@@ -322,7 +327,7 @@ Resources:
                       Action:
                           - sts:AssumeRole
                       Principal:
-                        Service: 
+                        Service:
                             - ec2.amazonaws.com
     WebInstanceProfile:
         Type: AWS::IAM::InstanceProfile
@@ -448,6 +453,7 @@ Resources:
         Properties:
             AutoMinorVersionUpgrade: true
             CacheNodeType: !Ref CacheInstanceType
+            CacheSubnetGroupName: !Ref Cachesubnet
             ClusterName: !Ref CacheClusterName
             Engine: !Ref CacheEngine
             EngineVersion: !Ref CacheEngineVersion
@@ -491,6 +497,7 @@ Resources:
     DatabaseInstance:
         Type: AWS::RDS::DBInstance
         Properties:
+            DBSubnetGroupName: "testrds1"
             DBName: !Ref DatabaseName
             AllocatedStorage: !Ref DatabaseVolumeSize
             DBInstanceClass: !Ref DatabaseInstanceType
