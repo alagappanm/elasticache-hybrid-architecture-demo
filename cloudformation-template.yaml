@@ -68,6 +68,7 @@ Metadata:
                 - DatabaseMultiAZ
                 - DatabaseVolumeSize
                 - DatabaseVolumeType
+                - DBSubnet
         ParameterLabels:
             CustomerAddress:
                 default: "Your IP address"
@@ -109,7 +110,7 @@ Parameters:
     Cachesubnet:
         Type: String
         Default: "testec1"
-        Description: "Cache subnet group name where this was erroring out"
+        Description: "Cache subnet"
     CacheInstanceType:
         Type: String
         Default: cache.t2.small
@@ -258,6 +259,10 @@ Parameters:
         Description: "Database Volume Type, gp2 for General Purpose SSD"
         AllowedValues:
             - gp2
+    DbSubnet:
+        Type: String
+        Default: "tesrds1"
+        Description: "DB subnet"
     Vpc:
         Type: AWS::EC2::VPC::Id
         Description: "VPC where the instances will be placed"
@@ -497,7 +502,7 @@ Resources:
     DatabaseInstance:
         Type: AWS::RDS::DBInstance
         Properties:
-            DBSubnetGroupName: "testrds1"
+            DBSubnetGroupName: !Ref DBSubnet
             DBName: !Ref DatabaseName
             AllocatedStorage: !Ref DatabaseVolumeSize
             DBInstanceClass: !Ref DatabaseInstanceType
